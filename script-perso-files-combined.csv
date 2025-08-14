@@ -1,0 +1,10 @@
+﻿Nom du produit,quantité,prix unitaire,catégorie,cout de production,Secteur
+d,2,3,oui,1,alimentaire
+e,5,2,non,"1,5",alimentaire
+f,3,2,oui,1,alimentaire
+a,2,3,oui,1,jouet
+B,5,2,non,"1,5",jouet
+c,3,2,oui,1,jouet
+g,2,3,oui,1,revente
+h,5,2,non,1,revente
+i,3,2,oui,1,revente

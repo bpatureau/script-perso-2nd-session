@@ -49,7 +49,26 @@ def search(file, value, field=None):
         print("Aucun résultat trouvé.")
 
 
+def report(file):
+    from datetime import date
+    qte = 0
+    value = 0
+    today_str = date.today().strftime("%Y-%m-%d")
+    output_file = f"./rapport_stock_{today_str}.csv"
+    with open(file, "r", newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            qte += int(row["quantité"])
+            value += float(row["prix unitaire"])
+        print("Quantité = " + str(qte))
+        print("Prix unitaire total = " + str(value) + "€")
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, delimiter=";") # excel windows
+            writer.writerow(["Quantity", "Value"])
+            writer.writerow(["Quantity", qte])
+            writer.writerow(["Totale Value (€)", value])
 
 if __name__ == '__main__':
-    combine_csv("./script-perso-files", './script-perso-files-combined.csv')
-    search('./script-perso-files-combined.csv', 'alimentaire', 'Secteur')
+    report('./script-perso-files-combined.csv')
+    # combine_csv("./script-perso-files", './script-perso-files-combined.csv')
+    # search('./script-perso-files-combined.csv', 'alimentaire', 'Secteur')

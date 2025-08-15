@@ -14,9 +14,7 @@ def combine_csv(input_directory, output_file):
         for file in files:
             sector = file.stem
             with open(file, 'r', newline='', encoding="utf-8") as in_csv:
-                reader = csv.DictReader(in_csv, delimiter=';') # delimiter=";" car je suis sur windows et Excel
-                # utilise la virgule dans mes fichiers CSV.
-
+                reader = csv.DictReader(in_csv, delimiter=';') # delimiter=";" car Excel sous Windows
                 if writer is None:
                     fieldnames = reader.fieldnames + ["Secteur"]
                     writer = csv.DictWriter(out_csv, fieldnames=fieldnames)
@@ -27,6 +25,7 @@ def combine_csv(input_directory, output_file):
                     writer.writerow(row)
 
     print(f"Consolidation terminée. Fichier généré : {output_file}")
+
 
 
 def search(file, value, field=None):
@@ -52,23 +51,51 @@ def search(file, value, field=None):
 def report(file):
     from datetime import date
     qte = 0
-    value = 0
+    valeur = 0
     today_str = date.today().strftime("%Y-%m-%d")
     output_file = f"./rapport_stock_{today_str}.csv"
-    with open(file, "r", newline="", encoding="utf-8") as csvfile:
-        reader = csv.DictReader(csvfile)
+
+    with open(file, "r", newline="", encoding="utf-8-sig") as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=',')
         for row in reader:
-            qte += int(row["quantité"])
-            value += float(row["prix unitaire"])
-        print("Quantité = " + str(qte))
-        print("Prix unitaire total = " + str(value) + "€")
-        with open(output_file, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f, delimiter=";") # excel windows
-            writer.writerow(["Quantity", "Value"])
-            writer.writerow(["Quantity", qte])
-            writer.writerow(["Totale Value (€)", value])
+            try:
+                qte += float(row["quantité"])
+                valeur += float(row["quantité"]) * float(row["prix unitaire"])
+            except ValueError:
+                pass
+
+    print(f"Quantité totale = {qte}")
+    print(f"Valeur totale = {valeur} €")
+
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Quantity", "Total Value (€)"])
+        writer.writerow([qte, valeur])
+
+    print(f"Rapport généré : {output_file}")
+
 
 if __name__ == '__main__':
-    report('./script-perso-files-combined.csv')
-    # combine_csv("./script-perso-files", './script-perso-files-combined.csv')
-    # search('./script-perso-files-combined.csv', 'alimentaire', 'Secteur')
+    parser = argparse.ArgumentParser(description="Outil de gestion des fichiers CSV de stocks")
+    parser.add_argument("--combine", action="store_true", help="Fusionner tous les CSV d'un dossier en un seul fichier")
+    parser.add_argument("--search", action="store_true", help="Rechercher dans un fichier CSV fusionné")
+    parser.add_argument("--input_dir", type=str, help="Dossier contenant les fichiers CSV")
+    parser.add_argument("--output_file", type=str, default="fichier_combine.csv", help="Nom du fichier fusionné")
+    parser.add_argument("--search_file", type=str, help="Fichier CSV dans lequel effectuer la recherche")
+    parser.add_argument("--field", type=str, help="Nom de la colonne où chercher")
+    parser.add_argument("--value", type=str, help="Valeur à rechercher")
+
+    args = parser.parse_args()
+
+    if args.combine:
+        if not args.input_dir:
+            print("Erreur : --input_dir est requis pour --combine")
+        else:
+            combine_csv(args.input_dir, args.output_file)
+            report(args.output_file)
+
+    if args.search:
+        if not args.search_file or not args.value:
+            print("Erreur : --search_file et --value sont requis pour --search")
+        else:
+            search(args.search_file, args.value, args.field)

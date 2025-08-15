@@ -48,12 +48,14 @@ def search(file, value, field=None):
         print("Aucun résultat trouvé.")
 
 
-def report(file):
+def report(file, output_file=None):
     from datetime import date
     qte = 0
     valeur = 0
-    today_str = date.today().strftime("%Y-%m-%d")
-    output_file = f"./rapport_stock_{today_str}.csv"
+
+    if output_file is None:
+        today_str = date.today().strftime("%Y-%m-%d")
+        output_file = f"./rapport_stock_{today_str}.csv"
 
     with open(file, "r", newline="", encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile, delimiter=',')
@@ -76,6 +78,10 @@ def report(file):
 
 
 if __name__ == '__main__':
+    # Exemple de script à lancer :
+    # python main.py --combine --input_dir ./script-perso-files --output_file fusion.csv
+    # python main.py --search --search_file fusion.csv --field Secteur --value alimentaire
+
     parser = argparse.ArgumentParser(description="Outil de gestion des fichiers CSV de stocks")
     parser.add_argument("--combine", action="store_true", help="Fusionner tous les CSV d'un dossier en un seul fichier")
     parser.add_argument("--search", action="store_true", help="Rechercher dans un fichier CSV fusionné")
